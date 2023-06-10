@@ -2,7 +2,6 @@ package com.example.reporteadorBackEnd.Controller.Nomina;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +19,7 @@ import com.example.reporteadorBackEnd.Entity.Nomina.EmpresasEntity;
 import com.example.reporteadorBackEnd.Repository.Nomina.EmpresaRepository;
 import com.example.reporteadorBackEnd.Service.Nomina.EmpresaService;
 
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, })
 @RestController

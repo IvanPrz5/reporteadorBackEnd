@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><cfdi:Comprobante version="Hola">
+  <cfdi:Emisor/>
+  <cfdi:Receptor/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto>
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos>
+    <cfdi:Traslados>
+      <cfdi:Traslado/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <implocal:ImpuestosLocales TotaldeRetenciones="0.00" TotaldeTraslados="11.35" version="1.0">
+      <implocal:TrasladosLocales ImpLocTrasladado="ISH" Importe="11.35" TasadeTraslado="0.03"/>
+    </implocal:ImpuestosLocales>
+    <tfd:TimbreFiscalDigital/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

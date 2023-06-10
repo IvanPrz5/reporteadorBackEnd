@@ -88,4 +88,11 @@ public class ClaveProdServController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
-}
+
+    //Native Querys
+    @GetMapping("/byDescripcion/{descripcion}")
+    public List<ClaveProdServEntity> byDescripcionBeLike(@PathVariable("descripcion") String descripcion){
+        return (List<ClaveProdServEntity>) claveProdServService.findByDescripcionBeLike(descripcion);
+    }
+
+} 

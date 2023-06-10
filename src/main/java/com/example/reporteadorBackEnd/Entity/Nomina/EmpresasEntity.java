@@ -42,6 +42,8 @@ public class EmpresasEntity {
     @Column
     private String fisica;
     @Column
+    private String rfc;
+    @Column
     private String curp;
     @Column
     private Boolean status;

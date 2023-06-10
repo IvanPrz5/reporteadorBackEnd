@@ -20,4 +20,8 @@ public class ClaveUnidadService {
         List<ClaveUnidadEntity> claveUnidad = claveUnidadRepository.findDataByStatus(status, sort);
         return claveUnidad;
     }
+
+    public List<ClaveUnidadEntity> findByNombreBeLike(String nombre){
+        return claveUnidadRepository.findByNombreBeLike(nombre);
+    }
 }

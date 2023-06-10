@@ -89,4 +89,10 @@ public class ClaveUnidadController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
+
+    // Native Query
+    @GetMapping("/byNombre/{nombre}")
+    public List<ClaveUnidadEntity> byNombreBeLike(@PathVariable("nombre") String nombre){
+        return (List<ClaveUnidadEntity>) claveUnidadService.findByNombreBeLike(nombre);
+    }
 }

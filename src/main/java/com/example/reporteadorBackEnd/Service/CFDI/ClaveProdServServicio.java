@@ -20,4 +20,8 @@ public class ClaveProdServServicio {
         List<ClaveProdServEntity> claveProdServ = claveProdServRepository.findDataByStatus(status, sort);
         return claveProdServ;
     }
+
+    public List<ClaveProdServEntity> findByDescripcionBeLike(String descripcion){
+        return claveProdServRepository.findByDescripcionBeLike(descripcion);
+    }
 }

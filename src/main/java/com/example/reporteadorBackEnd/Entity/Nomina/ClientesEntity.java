@@ -1,6 +1,8 @@
 package com.example.reporteadorBackEnd.Entity.Nomina;
 
+import com.example.reporteadorBackEnd.Entity.CFDI.CodigoPostalEntity;
 import com.example.reporteadorBackEnd.Entity.CFDI.RegimenFiscalEntity;
+import com.example.reporteadorBackEnd.Entity.CFDI.UsoCFDIEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,6 +47,14 @@ public class ClientesEntity {
     @ManyToOne
     @JoinColumn(name = "idRegimenFiscal")
     private RegimenFiscalEntity idRegimenFiscal;
+
+    @ManyToOne
+    @JoinColumn(name = "idUsoCfdi")
+    private UsoCFDIEntity idUsoCfdi;
+
+    @ManyToOne
+    @JoinColumn(name = "idCodigoPostal")
+    private CodigoPostalEntity idCodigoPostal;
 
     @ManyToOne
     @JoinColumn(name = "idEmpresas")
