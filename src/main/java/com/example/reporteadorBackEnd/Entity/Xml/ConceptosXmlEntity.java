@@ -2,6 +2,7 @@ package com.example.reporteadorBackEnd.Entity.Xml;
 
 import com.example.reporteadorBackEnd.Entity.CFDI.ClaveProdServEntity;
 import com.example.reporteadorBackEnd.Entity.CFDI.ClaveUnidadEntity;
+import com.example.reporteadorBackEnd.Entity.CFDI.ObjetoImpEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,4 +57,8 @@ public class ConceptosXmlEntity {
     @ManyToOne
     @JoinColumn(name = "idComprobante")
     private ComprobanteXmlEntity idComprobante;
+
+     @ManyToOne
+    @JoinColumn(name = "idObjetoImp")
+    private ObjetoImpEntity idObjetoImp;
 }

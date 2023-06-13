@@ -10,7 +10,5 @@ public class ReporteadorBackEndApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ReporteadorBackEndApplication.class, args);
-		TrasladoController trasladoController = new TrasladoController();
-		trasladoController.llenarXml(1L);
 	}
 }
