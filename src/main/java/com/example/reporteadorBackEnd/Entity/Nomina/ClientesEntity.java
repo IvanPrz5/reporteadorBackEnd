@@ -28,20 +28,15 @@ public class ClientesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
-    @NonNull
+    @Column(nullable = false)
     private String nombre;
-    @Column
-    @NonNull
+    @Column(nullable = false, length = 13)
     private String rfc;
     @Column
-    @NonNull
     private String correo;
     @Column
-    @NonNull
     private String telefono;
     @Column
-    @NonNull
     private Boolean status;
 
     @ManyToOne

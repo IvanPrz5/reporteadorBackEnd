@@ -1,19 +1,13 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.example.reporteadorBackEnd.Controller.CadenaOriginal.CadenaOriginalController;
 import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.ImpuestoXmlEntity;
@@ -46,109 +41,81 @@ public class XmlRelationController {
     @Autowired
     XmlRelacionService xmlRelacionService;
 
+    private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/modificado65.xml";
+
     @Transactional
     @GetMapping("/byIdComprobante/{id}")
-    public List<XmlRelationEntity> prueba(@PathVariable("id") Long id){
-        List<XmlRelationEntity> xmlRelationEntity = xmlRelacionService.getByIdComprobanteXml(id);
+    public List<XmlRelationEntity> prueba(@PathVariable("id") Long id) {
+
+        List<XmlRelationEntity> xmlRelationId = xmlRelacionService.getByIdComprobanteXml(id);
         try {
             String nameSpace = "http://www.sat.gob.mx/cfd/4";
             String prefijo = "cfdi:";
+            
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.newDocument();
 
-            /* for(int i=0; i<=xmlRelationEntity.){
-
-            }
- */
-            XmlRelationEntity algo = xmlRelationEntity.get(0);
-            ImpuestoXmlEntity comprobanteXmlEntity = algo.getIdImpuestoXml();
-
-            System.out.println(comprobanteXmlEntity.getId()); 
-
-            /* Element comprobante = document.createElementNS(nameSpace, prefijo + "Comprobante");
+            Element comprobante = document.createElementNS(nameSpace, prefijo + "Comprobante");
             document.appendChild(comprobante);
-
-
-
-            /* ComprobanteXmlEntity comprobanteEntity = xmlRelationEntity.toArray();
-
+            
+            XmlRelationEntity xmlRelationEntity = xmlRelationId.get(0);
+            System.out.println(xmlRelationEntity.getIdComprobanteXml().getVersion());
+            
+            ComprobanteXmlEntity comprobanteEntity = xmlRelationEntity.getIdComprobanteXml();
+            
             comprobante.setAttribute("Version", comprobanteEntity.getVersion());
-            comprobante.setAttribute("Fecha", comprobanteEntity.getFecha().toString()); */
+            comprobante.setAttribute("Fecha", comprobanteEntity.getFecha().toString());
+            // comprobante.setAttribute("Sello", comprobanteEntity.getSello());
+            // comprobante.setAttribute("NoCertificado",
+            // comprobanteEntity.getNoCertificado());
+            // comprobante.setAttribute("Certificado", comprobanteEntity.getCertificado());
+            comprobante.setAttribute("SubTotal", comprobanteEntity.getSubTotal().toString());
+            comprobante.setAttribute("Moneda", comprobanteEntity.getIdMoneda().getId());
+            comprobante.setAttribute("Total", comprobanteEntity.getTotal().toString());
+            comprobante.setAttribute("TipoDeComprobante", comprobanteEntity.getIdTipoComprobante().getId().toString());
+            comprobante.setAttribute("Exportacion", comprobanteEntity.getIdExportacion().getId().toString());
+            comprobante.setAttribute("MetodoPago", comprobanteEntity.getIdMetodoPago().getId().toString());
+            comprobante.setAttribute("LugarExpedicion", comprobanteEntity.getIdCodigoPostal().getId().toString());
+            comprobante.setAttribute("FormaPago", comprobanteEntity.getIdFormaPago().getId().toString());
 
-            return xmlRelationEntity;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+            Element emisor = document.createElement(prefijo + "Emisor");
+            comprobante.appendChild(emisor);
 
-    @GetMapping("/byId/{id}")
-    public XmlRelationEntity rellenarXml(@PathVariable("id") Long id){
-        Optional<XmlRelationEntity> xmlRelationId = xmlRelacionRepository.findById(id);
-        final String xmlSalida = "C:/Users/Propietario/Desktop/reporteadorBackEnd/modificado.xml";
+            emisor.setAttribute("Rfc", comprobanteEntity.getIdEmpresa().getRfc());
+            emisor.setAttribute("Nombre", comprobanteEntity.getIdEmpresa().getNombre());
+            emisor.setAttribute("RegimenFiscal", comprobanteEntity.getIdEmpresa().getIdRegimenFiscal().getId());
 
-        try {
-            if(xmlRelationId.isPresent()){
-                XmlRelationEntity xmlRelationEntity = xmlRelationId.get();
-                String nameSpace = "http://www.sat.gob.mx/cfd/4";
-                String prefijo = "cfdi:";
+            Element receptor = document.createElement(prefijo + "Receptor");
+            comprobante.appendChild(receptor);
 
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
-                Document document = documentBuilder.newDocument();
+            receptor.setAttribute("Rfc", comprobanteEntity.getIdCliente().getRfc());
+            receptor.setAttribute("Nombre", comprobanteEntity.getIdCliente().getNombre());
+            receptor.setAttribute("DomicilioFiscalReceptor",
+                    comprobanteEntity.getIdCliente().getIdCodigoPostal().getId());
+            receptor.setAttribute("RegimenFiscalReceptor",
+                    comprobanteEntity.getIdCliente().getIdRegimenFiscal().getId());
+            receptor.setAttribute("UsoCFDI", comprobanteEntity.getIdCliente().getIdUsoCfdi().getId());
 
-                Element comprobante = document.createElementNS(nameSpace, prefijo + "Comprobante");
-                document.appendChild(comprobante);
+            Element conceptos = document.createElement(prefijo + "Conceptos");
+            comprobante.appendChild(conceptos);
 
-                ComprobanteXmlEntity comprobanteEntity = xmlRelationEntity.getIdComprobanteXml();
+            for (int i = 0; i < xmlRelationId.size(); i++) {
+                XmlRelationEntity xmlRelationConceptos = xmlRelationId.get(i);
 
-                comprobante.setAttribute("Version", comprobanteEntity.getVersion());
-                comprobante.setAttribute("Fecha", comprobanteEntity.getFecha().toString());
-                // comprobante.setAttribute("Sello", comprobanteEntity.getSello());
-                // comprobante.setAttribute("NoCertificado", comprobanteEntity.getNoCertificado());
-                // comprobante.setAttribute("Certificado", comprobanteEntity.getCertificado());
-                comprobante.setAttribute("SubTotal", comprobanteEntity.getSubTotal().toString());
-                comprobante.setAttribute("Moneda", comprobanteEntity.getIdMoneda().getId());
-                comprobante.setAttribute("Total", comprobanteEntity.getTotal().toString());
-                comprobante.setAttribute("TipoDeComprobante", comprobanteEntity.getIdTipoComprobante().getId().toString());
-                comprobante.setAttribute("Exportacion", comprobanteEntity.getIdExportacion().getId().toString());
-                comprobante.setAttribute("MetodoPago", comprobanteEntity.getIdMetodoPago().getId().toString());
-                comprobante.setAttribute("LugarExpedicion", comprobanteEntity.getIdCodigoPostal().getId().toString());
-                comprobante.setAttribute("FormaPago", comprobanteEntity.getIdFormaPago().getId().toString());
-
-                Element emisor = document.createElement(prefijo + "Emisor");
-                comprobante.appendChild(emisor);
-
-                emisor.setAttribute("Rfc", comprobanteEntity.getIdEmpresa().getRfc());
-                emisor.setAttribute("Nombre", comprobanteEntity.getIdEmpresa().getNombre());
-                emisor.setAttribute("RegimenFiscal", comprobanteEntity.getIdEmpresa().getIdRegimenFiscal().getId());
-                
-                Element receptor = document.createElement(prefijo + "Receptor");
-                comprobante.appendChild(receptor);
-
-                receptor.setAttribute("Rfc", comprobanteEntity.getIdCliente().getRfc());
-                receptor.setAttribute("Nombre", comprobanteEntity.getIdCliente().getNombre());
-                receptor.setAttribute("DomicilioFiscalReceptor", comprobanteEntity.getIdCliente().getIdCodigoPostal().getId());
-                receptor.setAttribute("RegimenFiscalReceptor", comprobanteEntity.getIdCliente().getIdRegimenFiscal().getId());
-                receptor.setAttribute("UsoCFDI", comprobanteEntity.getIdCliente().getIdUsoCfdi().getId());
-
-                ConceptosXmlEntity conceptosEntity = xmlRelationEntity.getIdConceptosXml();
-
-                Element conceptos = document.createElement(prefijo + "Conceptos");
-                comprobante.appendChild(conceptos);
-
+                ConceptosXmlEntity conceptosXml = xmlRelationConceptos.getIdConceptosXml();
                 Element concepto = document.createElement(prefijo + "Concepto");
                 conceptos.appendChild(concepto);
 
-                concepto.setAttribute("ClaveProdServ", conceptosEntity.getIdClaveProdServ().getId());
-                concepto.setAttribute("Cantidad", conceptosEntity.getCantidad().toString());
-                concepto.setAttribute("ClaveUnidad", conceptosEntity.getIdClaveUnidad().getId());
-                concepto.setAttribute("Unidad", conceptosEntity.getUnidad());
-                concepto.setAttribute("Descripcion", conceptosEntity.getDescripcion());
-                concepto.setAttribute("ValorUnitario", conceptosEntity.getValorUnitario().toString());
-                concepto.setAttribute("Importe", conceptosEntity.getImporte().toString());
-                concepto.setAttribute("ObjetoImp", conceptosEntity.getIdObjetoImp().getId());
-
+                concepto.setAttribute("ClaveProdServ", conceptosXml.getIdClaveProdServ().getId());
+                concepto.setAttribute("Cantidad", conceptosXml.getCantidad().toString());
+                concepto.setAttribute("ClaveUnidad", conceptosXml.getIdClaveUnidad().getId());
+                concepto.setAttribute("Unidad", conceptosXml.getUnidad());
+                concepto.setAttribute("Descripcion", conceptosXml.getDescripcion());
+                concepto.setAttribute("ValorUnitario", conceptosXml.getValorUnitario().toString());
+                concepto.setAttribute("Importe", conceptosXml.getImporte().toString());
+                concepto.setAttribute("ObjetoImp", conceptosXml.getIdObjetoImp().getId());
+            
                 Element impuestos = document.createElement(prefijo + "Impuestos");
                 concepto.appendChild(impuestos);
                 Element traslados = document.createElement(prefijo + "Traslados");
@@ -156,52 +123,68 @@ public class XmlRelationController {
                 Element traslado = document.createElement(prefijo + "Traslado");
                 traslados.appendChild(traslado);
 
-                TrasladoXmlEntity trasladoXmlEntity = xmlRelationEntity.getIdTrasladosXml();
+                XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+
+                TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
 
                 traslado.setAttribute("Base", trasladoXmlEntity.getBase().toString());
                 traslado.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
                 traslado.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
                 traslado.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
                 traslado.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
+            }
 
-                String tipoComprobante = comprobanteEntity.getIdTipoComprobante().getId().toString();
+            String tipoComprobante = comprobanteEntity.getIdTipoComprobante().getId().toString();
+            System.out.println(tipoComprobante);
 
-                if(tipoComprobante != "T" || tipoComprobante != "P"){
+            if (tipoComprobante != "T" || tipoComprobante != "P") {
                     Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
                     comprobante.appendChild(nodoImpuestos);
 
                     ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
 
-                    if(impuestoXml.getTotalImpuestosTrasladados().toString() != null){
-                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestoXml.getTotalImpuestosTrasladados().toString());
-                        Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
-                        nodoImpuestos.appendChild(trasladosNodoImp);
-                        Element trasladoChild = document.createElement(prefijo + "Traslado");
-                        trasladosNodoImp.appendChild(trasladoChild);
-                        trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
-                        trasladoChild.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
-                        trasladoChild.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
-                        trasladoChild.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
-                        trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
-                    }else{
-                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestoXml.getTotalImpuestosTrasladados().toString());
+                    if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
+                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
+                        impuestoXml.getTotalImpuestosTrasladados().toString());
+                        
+                        for(int i=0; i<xmlRelationId.size(); i++){
+                            XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+                            TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                            
+                            Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
+                            nodoImpuestos.appendChild(trasladosNodoImp);
+                            Element trasladoChild = document.createElement(prefijo + "Traslado");
+                            
+                            trasladosNodoImp.appendChild(trasladoChild);
+                            trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
+                            trasladoChild.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
+                            trasladoChild.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
+                            trasladoChild.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
+                            trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
+                        }
+                    } else {
+                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
+                        impuestoXml.getTotalImpuestosTrasladados().toString());
                     }
-                } 
+                }
 
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(document);
-                StreamResult result = new StreamResult(new File(xmlSalida));
-                transformer.transform(source, result);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(document);
+            StreamResult result = new StreamResult(new File(xmlPath));
+            transformer.transform(source, result);
 
-                return xmlRelationEntity;
-
-            }else{
-                return  null;
-            }
+            return xmlRelationId;
         } catch (Exception e) {
             return null;
         }
-        // return null;
     }
+
+    public String getXml(){
+        CadenaOriginalController cadenaOriginalController = new CadenaOriginalController();
+        String xmlSellado = "C:/Users/Propietario/Desktop/reporteadorBackEnd/sellado.xml";
+        cadenaOriginalController.sellarXml("12345678a", xmlPath, xmlSellado);
+        return null;
+    }
+
 }

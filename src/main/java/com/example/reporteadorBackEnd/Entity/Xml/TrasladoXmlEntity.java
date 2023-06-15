@@ -1,5 +1,9 @@
 package com.example.reporteadorBackEnd.Entity.Xml;
 
+import java.math.BigDecimal;
+
+import org.hibernate.annotations.Type;
+
 import com.example.reporteadorBackEnd.Entity.CFDI.ImpuestoEntity;
 import com.example.reporteadorBackEnd.Entity.CFDI.TasaCuotaEntity;
 import com.example.reporteadorBackEnd.Entity.CFDI.TipoFactorEntity;
@@ -31,8 +35,8 @@ public class TrasladoXmlEntity {
     @Column(nullable = false)
     private Double base;
     
-    @Column(nullable = false)
-    private Double importe;
+    @Column(nullable = false, precision = 10, scale = 6)
+    private BigDecimal importe;
     
     @Column
     private Boolean status;
