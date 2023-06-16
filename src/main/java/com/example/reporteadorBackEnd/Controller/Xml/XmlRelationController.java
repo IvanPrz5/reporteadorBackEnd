@@ -1,6 +1,9 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,7 +44,8 @@ public class XmlRelationController {
     @Autowired
     XmlRelacionService xmlRelacionService;
 
-    private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/modificado65.xml";
+    private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi4.xml";
+    private final String xmlSalida = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi45.xml";
 
     @Transactional
     @GetMapping("/byIdComprobante/{id}")
@@ -58,18 +62,20 @@ public class XmlRelationController {
 
             Element comprobante = document.createElementNS(nameSpace, prefijo + "Comprobante");
             document.appendChild(comprobante);
+            comprobante.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            comprobante.setAttribute("xmlns:implocal", "http://www.sat.gob.mx/implocal");
+            comprobante.setAttribute("xsi:schemaLocation", "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd");
             
             XmlRelationEntity xmlRelationEntity = xmlRelationId.get(0);
             System.out.println(xmlRelationEntity.getIdComprobanteXml().getVersion());
             
             ComprobanteXmlEntity comprobanteEntity = xmlRelationEntity.getIdComprobanteXml();
-            
+
             comprobante.setAttribute("Version", comprobanteEntity.getVersion());
             comprobante.setAttribute("Fecha", comprobanteEntity.getFecha().toString());
             // comprobante.setAttribute("Sello", comprobanteEntity.getSello());
-            // comprobante.setAttribute("NoCertificado",
-            // comprobanteEntity.getNoCertificado());
-            // comprobante.setAttribute("Certificado", comprobanteEntity.getCertificado());
+            comprobante.setAttribute("NoCertificado",comprobanteEntity.getNoCertificado());
+            comprobante.setAttribute("Certificado", comprobanteEntity.getCertificado());
             comprobante.setAttribute("SubTotal", comprobanteEntity.getSubTotal().toString());
             comprobante.setAttribute("Moneda", comprobanteEntity.getIdMoneda().getId());
             comprobante.setAttribute("Total", comprobanteEntity.getTotal().toString());
@@ -144,24 +150,38 @@ public class XmlRelationController {
                     ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
 
                     if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
-                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
-                        impuestoXml.getTotalImpuestosTrasladados().toString());
-                        
+                        Element trasladosNodoImp = document.createElement(prefijo + "Traslados"); 
+                        nodoImpuestos.appendChild(trasladosNodoImp);
+
+                        Double result = 0D;
                         for(int i=0; i<xmlRelationId.size(); i++){
                             XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
                             TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+
+                            String prueba = trasladoXmlEntity.getIdTasaCuota().getValorMaximo();
+                            System.out.println(prueba);
                             
-                            Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
-                            nodoImpuestos.appendChild(trasladosNodoImp);
+                            if(prueba.equals(trasladoXmlEntity.getIdTasaCuota().getValorMaximo())){
+                                System.out.println("Hola" + "**");
+                            }
                             Element trasladoChild = document.createElement(prefijo + "Traslado");
-                            
+
                             trasladosNodoImp.appendChild(trasladoChild);
+
                             trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
                             trasladoChild.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
                             trasladoChild.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
-                            trasladoChild.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
-                            trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
+                            
+                            String attrTipoFac = trasladoChild.getAttribute("TipoFactor");
+                            attrTipoFac.indexOf("Exento");
+                            if(attrTipoFac.indexOf("Exento") == -1){
+                                trasladoChild.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
+                                trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
+                            }
+
+                            result += trasladoXmlEntity.getImporte();
                         }
+                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados", result.toString());
                     } else {
                         nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
                         impuestoXml.getTotalImpuestosTrasladados().toString());
@@ -171,9 +191,8 @@ public class XmlRelationController {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(new File(xmlPath));
+            StreamResult result = new StreamResult(new File(xmlSalida));
             transformer.transform(source, result);
-
             return xmlRelationId;
         } catch (Exception e) {
             return null;

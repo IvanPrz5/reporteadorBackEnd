@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,13 +41,13 @@ public class ComprobanteXmlEntity {
     @Column(nullable = false)
     private LocalDateTime fecha;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT", length = 3000)
     private String sello;
     
     @Column(nullable = false)
     private String noCertificado;
     
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT", length = 3000)
     private String certificado;
 
     @Column

@@ -35,8 +35,8 @@ public class TrasladoXmlEntity {
     @Column(nullable = false)
     private Double base;
     
-    @Column(nullable = false, precision = 10, scale = 6)
-    private BigDecimal importe;
+    @Column(nullable = false)
+    private Double importe;
     
     @Column
     private Boolean status;

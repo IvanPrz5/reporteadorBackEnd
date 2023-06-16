@@ -21,7 +21,7 @@ import org.w3c.dom.Document;
 
 public class CadenaOriginalController {
 
-    private final String xsltPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/xslt/cadenaoriginal_3_3.xslt";
+    private final String xsltPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/xslt/cadenaoriginal_4_0.xslt";
 	private final String key = "C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/certificados/CSD_EKU9003173C9.key";
 
 	public String getCadenaOriginal(String xmlPath){
@@ -30,6 +30,7 @@ public class CadenaOriginalController {
             StreamSource sourceXsl = new StreamSource(xslt);
             File cfdi = new File(xmlPath);
             StreamSource sourceXml = new StreamSource(cfdi);
+
 
             TransformerFactory tFactory = TransformerFactory.newInstance();
             Transformer transformer = tFactory.newTransformer(sourceXsl);
@@ -56,7 +57,7 @@ public class CadenaOriginalController {
 			signature.update(getCadenaOriginal(xmlPath).getBytes("UTF-8"));
 
 			String selloCfdi = new String(Base64.getEncoder().encode(signature.sign()));
-			System.out.println("Sello:      " + selloCfdi);
+			System.out.println("Sello: " + selloCfdi);
 
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
