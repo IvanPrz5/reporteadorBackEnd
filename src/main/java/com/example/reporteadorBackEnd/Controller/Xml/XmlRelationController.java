@@ -1,16 +1,19 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.annotation.processing.SupportedOptions;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.example.reporteadorBackEnd.Controller.CadenaOriginal.CadenaOriginalController;
 import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
@@ -55,7 +60,7 @@ public class XmlRelationController {
         try {
             String nameSpace = "http://www.sat.gob.mx/cfd/4";
             String prefijo = "cfdi:";
-            
+
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.newDocument();
@@ -64,17 +69,18 @@ public class XmlRelationController {
             document.appendChild(comprobante);
             comprobante.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
             comprobante.setAttribute("xmlns:implocal", "http://www.sat.gob.mx/implocal");
-            comprobante.setAttribute("xsi:schemaLocation", "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd");
-            
+            comprobante.setAttribute("xsi:schemaLocation",
+                    "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd");
+
             XmlRelationEntity xmlRelationEntity = xmlRelationId.get(0);
             System.out.println(xmlRelationEntity.getIdComprobanteXml().getVersion());
-            
+
             ComprobanteXmlEntity comprobanteEntity = xmlRelationEntity.getIdComprobanteXml();
 
             comprobante.setAttribute("Version", comprobanteEntity.getVersion());
             comprobante.setAttribute("Fecha", comprobanteEntity.getFecha().toString());
             // comprobante.setAttribute("Sello", comprobanteEntity.getSello());
-            comprobante.setAttribute("NoCertificado",comprobanteEntity.getNoCertificado());
+            comprobante.setAttribute("NoCertificado", comprobanteEntity.getNoCertificado());
             comprobante.setAttribute("Certificado", comprobanteEntity.getCertificado());
             comprobante.setAttribute("SubTotal", comprobanteEntity.getSubTotal().toString());
             comprobante.setAttribute("Moneda", comprobanteEntity.getIdMoneda().getId());
@@ -121,7 +127,7 @@ public class XmlRelationController {
                 concepto.setAttribute("ValorUnitario", conceptosXml.getValorUnitario().toString());
                 concepto.setAttribute("Importe", conceptosXml.getImporte().toString());
                 concepto.setAttribute("ObjetoImp", conceptosXml.getIdObjetoImp().getId());
-            
+
                 Element impuestos = document.createElement(prefijo + "Impuestos");
                 concepto.appendChild(impuestos);
                 Element traslados = document.createElement(prefijo + "Traslados");
@@ -144,62 +150,86 @@ public class XmlRelationController {
             System.out.println(tipoComprobante);
 
             if (tipoComprobante != "T" || tipoComprobante != "P") {
-                    Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
-                    comprobante.appendChild(nodoImpuestos);
+                Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
+                comprobante.appendChild(nodoImpuestos);
 
-                    ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
+                ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
 
-                    if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
-                        Element trasladosNodoImp = document.createElement(prefijo + "Traslados"); 
-                        nodoImpuestos.appendChild(trasladosNodoImp);
+                if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
+                    Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
+                    nodoImpuestos.appendChild(trasladosNodoImp);
 
-                        Double result = 0D;
-                        for(int i=0; i<xmlRelationId.size(); i++){
-                            XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
-                            TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                    Double result = 0D;
+                    Double importe = 0D;
+                    NodeList list = document.getElementsByTagName("cfdi:Traslado");
+                    ArrayList<String> arrayTasaCuota = new ArrayList<String>();
+                    ArrayList<String> array = new ArrayList<String>();
+                    for (int i = 0; i < xmlRelationId.size(); i++) {
+                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+                        TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                        arrayTasaCuota.add(trasladoXmlEntity.getIdTasaCuota().getValorMaximo());
+                        Element element = (Element) list.item(i);
+                        String atribTasaCuota = element.getAttribute("TasaOCuota");
+                        array.add(atribTasaCuota);
+                        // System.out.println(atribTasaCuota);
+                        /* if(atribTasaCuota.){
+                            trasladoXmlEntity.getImporte();
+                            System.out.println(trasladoXmlEntity.getImporte());
+                        } */
 
-                            String prueba = trasladoXmlEntity.getIdTasaCuota().getValorMaximo();
-                            System.out.println(prueba);
-                            
-                            if(prueba.equals(trasladoXmlEntity.getIdTasaCuota().getValorMaximo())){
-                                System.out.println("Hola" + "**");
-                            }
-                            Element trasladoChild = document.createElement(prefijo + "Traslado");
-
-                            trasladosNodoImp.appendChild(trasladoChild);
-
-                            trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
-                            trasladoChild.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
-                            trasladoChild.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
-                            
-                            String attrTipoFac = trasladoChild.getAttribute("TipoFactor");
-                            attrTipoFac.indexOf("Exento");
-                            if(attrTipoFac.indexOf("Exento") == -1){
-                                trasladoChild.setAttribute("TasaOCuota", trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
-                                trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
-                            }
-
-                            result += trasladoXmlEntity.getImporte();
-                        }
-                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados", result.toString());
-                    } else {
-                        nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
-                        impuestoXml.getTotalImpuestosTrasladados().toString());
+                        result += trasladoXmlEntity.getImporte();
                     }
+                    System.out.println(array);
+                    Set<String> hashSet = new HashSet<String>(arrayTasaCuota);
+                    arrayTasaCuota.clear();
+                    arrayTasaCuota.addAll(hashSet);
+
+                    for(int i=0; i<array.size(); i++){
+                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+                        TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                        Element element = (Element) list.item(i);
+                        String atribTasaCuota = element.getAttribute("TasaOCuota");
+
+                        if(atribTasaCuota.equals("0.160000")){
+                            Element trasladoChild = document.createElement(prefijo + "Traslado");
+                            trasladosNodoImp.appendChild(trasladoChild);
+                            trasladoChild.setAttribute("TasaOCuota", "0.160000");
+                            System.out.println(trasladoXmlEntity.getImporte() + "-+-+-");
+                            Double suma = 0D;
+                            suma += trasladoXmlEntity.getImporte();
+                            trasladoChild.setAttribute("Importe", suma.toString());
+                        }else
+                        if(atribTasaCuota.equals("0.080000")){
+
+                        }
+                    }
+
+                    /* for(int i=0; i<arrayTasaCuota.size(); i++){
+                        Element trasladoChild = document.createElement(prefijo + "Traslado");
+                        trasladosNodoImp.appendChild(trasladoChild);
+                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
+                    }
+ */
+                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados", result.toString());
+                } else {
+                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados",
+                            impuestoXml.getTotalImpuestosTrasladados().toString());
                 }
+            }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(new File(xmlSalida));
             transformer.transform(source, result);
+
             return xmlRelationId;
         } catch (Exception e) {
             return null;
         }
     }
 
-    public String getXml(){
+    public String getXml() {
         CadenaOriginalController cadenaOriginalController = new CadenaOriginalController();
         String xmlSellado = "C:/Users/Propietario/Desktop/reporteadorBackEnd/sellado.xml";
         cadenaOriginalController.sellarXml("12345678a", xmlPath, xmlSellado);
@@ -207,3 +237,26 @@ public class XmlRelationController {
     }
 
 }
+
+
+/* if (prueba.equals(hoa)) {
+                            Element trasladoChild = document.createElement(prefijo + "Traslado");
+                            trasladosNodoImp.appendChild(trasladoChild);
+                            trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
+                            // document.replaceChild(trasladosNodoImp, element);
+                            // System.out.println("Hola");
+                        } */
+
+                        // trasladosNodoImp.appendChild(trasladoChild);
+
+                       /*  trasladoChild.setAttribute("Base", trasladoXmlEntity.getBase().toString());
+                        trasladoChild.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
+                        trasladoChild.setAttribute("TipoFactor", trasladoXmlEntity.getIdTipoFactor().getId());
+
+                        String attrTipoFac = trasladoChild.getAttribute("TipoFactor");
+                        attrTipoFac.indexOf("Exento");
+                        if (attrTipoFac.indexOf("Exento") == -1) {
+                            trasladoChild.setAttribute("TasaOCuota",
+                                    trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
+                            trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
+                        } */
