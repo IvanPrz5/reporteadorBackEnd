@@ -22,18 +22,24 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RetencionesXml")
-public class RetencionesXmlEntity {
+@Table(name = "TrasladoOrRetencionXml")
+public class TrasladoOrRetencionXmlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(nullable = false)
     private Double base;
-
+    
     @Column(nullable = false)
     private Double importe;
 
+    @Column
+    private Boolean isTraslado;
+
+    @Column
+    private Boolean isRetencion;
+    
     @Column
     private Boolean status;
 
@@ -48,4 +54,8 @@ public class RetencionesXmlEntity {
     @ManyToOne
     @JoinColumn(name = "idTasaCuota")
     private TasaCuotaEntity idTasaCuota;
+
+    @ManyToOne
+    @JoinColumn(name = "idConcepto")
+    private ConceptosXmlEntity idConcepto;
 }

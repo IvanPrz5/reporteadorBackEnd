@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
 import com.example.reporteadorBackEnd.Service.Xml.ConceptosService;
 
@@ -35,4 +34,5 @@ public class ConceptosController {
     public ResponseEntity<ConceptosXmlEntity> createRegistro(@Valid @RequestBody ConceptosXmlEntity concepto){
         return conceptosService.createRegistro(concepto);
     }
+
 }

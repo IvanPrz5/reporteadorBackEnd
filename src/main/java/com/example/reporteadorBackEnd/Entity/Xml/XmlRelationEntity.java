@@ -41,9 +41,5 @@ public class XmlRelationEntity {
 
     @ManyToOne
     @JoinColumn(name = "idTrasladosXml")
-    private TrasladoXmlEntity idTrasladosXml;
-
-    @ManyToOne
-    @JoinColumn(name = "idRetencionesXml")
-    private RetencionesXmlEntity idRetencionesXml;
+    private TrasladoOrRetencionXmlEntity idTrasladosXml;
 }

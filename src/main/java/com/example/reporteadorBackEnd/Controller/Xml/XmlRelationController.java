@@ -1,10 +1,10 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,16 +22,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.example.reporteadorBackEnd.Controller.CadenaOriginal.CadenaOriginalController;
+import com.example.reporteadorBackEnd.Entity.CFDI.TasaCuotaEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
-import com.example.reporteadorBackEnd.Entity.Xml.ImpuestoXmlEntity;
-import com.example.reporteadorBackEnd.Entity.Xml.TrasladoXmlEntity;
+import com.example.reporteadorBackEnd.Entity.Xml.TrasladoOrRetencionXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.XmlRelationEntity;
+import com.example.reporteadorBackEnd.Repository.CFDI.TasaCuotaRepository;
 import com.example.reporteadorBackEnd.Repository.Xml.XmlRelacionRepository;
+import com.example.reporteadorBackEnd.Service.CFDI.TasaCuotaService;
+import com.example.reporteadorBackEnd.Service.Xml.TrasladoOrRetencionService;
 import com.example.reporteadorBackEnd.Service.Xml.XmlRelacionService;
 
 import jakarta.transaction.Transactional;
@@ -48,6 +48,12 @@ public class XmlRelationController {
     @Autowired
     XmlRelacionService xmlRelacionService;
 
+    @Autowired
+    TrasladoOrRetencionService trasladoOrRetencionService;
+
+    @Autowired
+    TasaCuotaRepository tasaCuotaRepository;
+
     private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi4.xml";
     private final String xmlSalida = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi45.xml";
 
@@ -60,7 +66,7 @@ public class XmlRelationController {
             String nameSpace = "http://www.sat.gob.mx/cfd/4";
             String prefijo = "cfdi:";
 
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();  
             DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
             Document document = documentBuilder.newDocument();
 
@@ -136,7 +142,7 @@ public class XmlRelationController {
 
                 XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
 
-                TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                TrasladoOrRetencionXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
 
                 traslado.setAttribute("Base", trasladoXmlEntity.getBase().toString());
                 traslado.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
@@ -151,105 +157,22 @@ public class XmlRelationController {
             if (tipoComprobante != "T" || tipoComprobante != "P") {
                 Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
                 comprobante.appendChild(nodoImpuestos);
-
-                ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
-
-                if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
-                    Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
-                    nodoImpuestos.appendChild(trasladosNodoImp);
-
-                    Double result = 0D;
-                    Double suma = 0D;
-                    Double suma2 = 0D;
-                    NodeList list = document.getElementsByTagName("cfdi:Traslado");
-                    ArrayList<String> arrayTasaCuota = new ArrayList<String>();
-                    ArrayList<Double> arrayImporte = new ArrayList<Double>();
-                    for (int i = 0; i < xmlRelationId.size(); i++) {
-                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
-                        TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
-                        Element element = (Element) list.item(i);
-                        String atribTasaCuota = element.getAttribute("TasaOCuota");
-                        arrayTasaCuota.add(atribTasaCuota);
-                        if(atribTasaCuota.equals("0.160000")){
-                            String atribImp = element.getAttribute("Importe");
-                            suma += Double.parseDouble(atribImp); 
-                        }
-                        if(atribTasaCuota.equals("0.080000")){
-                            String atribImp = element.getAttribute("Importe");
-                            suma2 += Double.parseDouble(atribImp); 
-                        }
-                        // select t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor , sum(t.importe), count (*) from traslado_xml as t group by t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor; 
-                        /* Element trasladoChild = document.createElement(prefijo + "Traslado");
-                        trasladosNodoImp.appendChild(trasladoChild);
-                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i)); */
-                        /* array.add(atribTasaCuota);
-                        System.out.println(atribTasaCuota); */
-                        /* if(atribTasaCuota.){
-                            trasladoXmlEntity.getImporte();
-                            System.out.println(trasladoXmlEntity.getImporte());
-                        } */
-                        result += trasladoXmlEntity.getImporte();
-                    }
-                    System.out.println(suma);
-                    arrayImporte.add(suma);
-                    arrayImporte.add(suma2);
-                    System.out.println(arrayImporte);
-                
-                    Set<String> hashSet = new HashSet<String>(arrayTasaCuota);
-                    arrayTasaCuota.clear();
-                    arrayTasaCuota.addAll(hashSet);
-
-                    for(int i=0; i<arrayTasaCuota.size(); i++){
-                        // Element element = (Element) list.item(i);
-                        Element trasladoChild = document.createElement(prefijo + "Traslado");
-                        trasladosNodoImp.appendChild(trasladoChild);
-                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
-                        trasladoChild.setAttribute("Importe", arrayImporte.get(i).toString());
-
-                    }
-                    /* Double suma = 0D;
-                    for(int i=0; i<array.size(); i++){
-                        Element element = (Element) list.item(i);
-                        String atribTasaCuota2 = element.getAttribute("Importe");
-                        Element trasladoChild = document.createElement(prefijo + "Traslado");
-                        trasladosNodoImp.appendChild(trasladoChild);
-                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
-                        trasladoChild.setAttribute("Importe", atribTasaCuota2);
-                        if(trasladoChild.getAttribute("TasaOCuota").equals("0.160000")){
-                        }else if(trasladoChild.getAttribute("TasaOCuota").equals("0.080000")){
-                            // trasladoChild.setAttribute("Importe", suma2.toString());
-                        }
-                    } */
-                    /* Double suma2 = 0D; 
-                    for(int i=0; i<array.size(); i++){
-                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
-                        TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
-                        Element element = (Element) list.item(i);
-                        String atribTasaCuota = element.getAttribute("TasaOCuota");
-                        /* for(int j=i+1; j<array.size(); j++){
-                            if(array.get(i).equals(array.get(j))){
-                                System.out.println(array.get(i) + "....");
-                                Element trasladoChild = document.createElement(prefijo + "Traslado");
-                                trasladosNodoImp.appendChild(trasladoChild);
-                                trasladoChild.setAttribute("TasaOCuota", array.get(i));
-                            }else{
-                                System.out.println(array.get(j));
-                            }
-                        } 
-                        if(atribTasaCuota.equals("0.000000")){
-                            // suma += trasladoXmlEntity.getImporte();
-                        }
-                        if(atribTasaCuota.equals("0.160000")){
-                            suma += trasladoXmlEntity.getImporte();
-                        }
-                        if(atribTasaCuota.equals("0.080000")){
-                            suma2 += trasladoXmlEntity.getImporte();
-                        }
-                    } */
-
-                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados", result.toString());
-                } else {
-                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestoXml.getTotalImpuestosTrasladados().toString());
+                String impuestosTrasladado = trasladoOrRetencionService.sumaImporteTraslado().get(0);
+                System.out.println(trasladoOrRetencionService.sumaImporteTraslado().get(0) + "*****");
+                nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestosTrasladado);
+                String impuestosRetenidos = trasladoOrRetencionService.sumaImporteRetenidos().get(0);
+                nodoImpuestos.setAttribute("TotalImpuestosRetenidos", impuestosRetenidos);
+                List<String> array = trasladoOrRetencionService.sumaAndgroupByTasaCuota();
+                List<String> array2 = trasladoOrRetencionService.prueba();
+                for(int i=0; i<array.size(); i++){
+                    System.out.println(array.get(i));
+                    String result [] = array.get(i).split(",");
+                    Element trasladoChild = document.createElement(prefijo + "Traslado");
+                    nodoImpuestos.appendChild(trasladoChild);
+                    trasladoChild.setAttribute("Impuesto", result[1]);
+                    trasladoChild.setAttribute("TipoFactor", result[2]);
+                    trasladoChild.setAttribute("TasaOCuota", array2.get(i));
+                    trasladoChild.setAttribute("Importe", result[5]);
                 }
             }
 
@@ -315,4 +238,115 @@ public class XmlRelationController {
                             trasladoChild.setAttribute("TasaOCuota",
                                     trasladoXmlEntity.getIdTasaCuota().getValorMaximo().toString());
                             trasladoChild.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
-                        } */
+                        } 
+                        
+                        String tipoComprobante = comprobanteEntity.getIdTipoComprobante().getId().toString();
+            System.out.println(tipoComprobante);
+
+            if (tipoComprobante != "T" || tipoComprobante != "P") {
+                Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
+                comprobante.appendChild(nodoImpuestos);
+                ImpuestoXmlEntity impuestoXml = xmlRelationEntity.getIdImpuestoXml();
+
+                if (impuestoXml.getTotalImpuestosTrasladados().toString() != null) {
+                    Element trasladosNodoImp = document.createElement(prefijo + "Traslados");
+                    nodoImpuestos.appendChild(trasladosNodoImp);
+
+                    Double result = 0D;
+                    Double suma = 0D;
+                    Double suma2 = 0D;
+                    NodeList list = document.getElementsByTagName("cfdi:Traslado");
+                    ArrayList<String> arrayTasaCuota = new ArrayList<String>();
+                    ArrayList<Double> arrayImporte = new ArrayList<Double>();
+                    for (int i = 0; i < xmlRelationId.size(); i++) {
+                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+                        TrasladoOrRetencionXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                        Element element = (Element) list.item(i);
+                        String atribTasaCuota = element.getAttribute("TasaOCuota");
+                        arrayTasaCuota.add(atribTasaCuota);
+                        if(atribTasaCuota.equals("0.160000")){
+                            String atribImp = element.getAttribute("Importe");
+                            suma += Double.parseDouble(atribImp); 
+                        }
+                        if(atribTasaCuota.equals("0.080000")){
+                            String atribImp = element.getAttribute("Importe");
+                            suma2 += Double.parseDouble(atribImp); 
+                        }
+                            // select t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor , 
+                            // sum(t.importe), count (*) from traslado_xml as t group by t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor; 
+                        Element trasladoChild = document.createElement(prefijo + "Traslado");
+                        trasladosNodoImp.appendChild(trasladoChild);
+                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
+                        array.add(atribTasaCuota);
+                        System.out.println(atribTasaCuota);
+                        if(atribTasaCuota.){
+                            trasladoXmlEntity.getImporte();
+                            System.out.println(trasladoXmlEntity.getImporte());
+                        }
+                        result += trasladoXmlEntity.getImporte();
+                    }
+                    System.out.println(suma);
+                    arrayImporte.add(suma);
+                    arrayImporte.add(suma2);
+                    System.out.println(arrayImporte);
+                
+                    Set<String> hashSet = new HashSet<String>(arrayTasaCuota);
+                    arrayTasaCuota.clear();
+                    arrayTasaCuota.addAll(hashSet);
+
+                    for(int i=0; i<arrayTasaCuota.size(); i++){
+                        // Element element = (Element) list.item(i);
+                        Element trasladoChild = document.createElement(prefijo + "Traslado");
+                        trasladosNodoImp.appendChild(trasladoChild);
+                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
+                        trasladoChild.setAttribute("Importe", arrayImporte.get(i).toString());
+
+                    }
+                    /* Double suma = 0D;
+                    for(int i=0; i<array.size(); i++){
+                        Element element = (Element) list.item(i);
+                        String atribTasaCuota2 = element.getAttribute("Importe");
+                        Element trasladoChild = document.createElement(prefijo + "Traslado");
+                        trasladosNodoImp.appendChild(trasladoChild);
+                        trasladoChild.setAttribute("TasaOCuota", arrayTasaCuota.get(i));
+                        trasladoChild.setAttribute("Importe", atribTasaCuota2);
+                        if(trasladoChild.getAttribute("TasaOCuota").equals("0.160000")){
+                        }else if(trasladoChild.getAttribute("TasaOCuota").equals("0.080000")){
+                            // trasladoChild.setAttribute("Importe", suma2.toString());
+                        }
+                    } */
+                    /* Double suma2 = 0D; 
+                    for(int i=0; i<array.size(); i++){
+                        XmlRelationEntity xmlRelationTraslados = xmlRelationId.get(i);
+                        TrasladoXmlEntity trasladoXmlEntity = xmlRelationTraslados.getIdTrasladosXml();
+                        Element element = (Element) list.item(i);
+                        String atribTasaCuota = element.getAttribute("TasaOCuota");
+                        for(int j=i+1; j<array.size(); j++){
+                            if(array.get(i).equals(array.get(j))){
+                                System.out.println(array.get(i) + "....");
+                                Element trasladoChild = document.createElement(prefijo + "Traslado");
+                                trasladosNodoImp.appendChild(trasladoChild);
+                                trasladoChild.setAttribute("TasaOCuota", array.get(i));
+                            }else{
+                                System.out.println(array.get(j));
+                            }
+                        } 
+                        if(atribTasaCuota.equals("0.000000")){
+                            // suma += trasladoXmlEntity.getImporte();
+                        }
+                        if(atribTasaCuota.equals("0.160000")){
+                            suma += trasladoXmlEntity.getImporte();
+                        }
+                        if(atribTasaCuota.equals("0.080000")){
+                            suma2 += trasladoXmlEntity.getImporte();
+                        }
+                    }
+
+                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados", result.toString());
+                } else {
+                    // nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestoXml.getTotalImpuestosTrasladados().toString());
+                }
+                        
+                        
+                        
+                        */

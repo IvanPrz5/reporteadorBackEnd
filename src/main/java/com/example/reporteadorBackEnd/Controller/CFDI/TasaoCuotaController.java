@@ -19,12 +19,13 @@ import com.example.reporteadorBackEnd.Entity.CFDI.TasaCuotaEntity;
 import com.example.reporteadorBackEnd.Repository.CFDI.TasaCuotaRepository;
 import com.example.reporteadorBackEnd.Service.CFDI.TasaCuotaService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, })
 @RestController
-@RequestMapping("auth/TasaoCuota")
+@RequestMapping("auth/TasaCuota")
 public class TasaoCuotaController {
     
     @Autowired
