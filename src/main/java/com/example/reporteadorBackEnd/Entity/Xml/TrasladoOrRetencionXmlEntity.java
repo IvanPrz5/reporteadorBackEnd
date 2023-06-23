@@ -56,6 +56,10 @@ public class TrasladoOrRetencionXmlEntity {
     private TasaCuotaEntity idTasaCuota;
 
     @ManyToOne
-    @JoinColumn(name = "idConcepto")
+    @JoinColumn(name = "idConceptoXml")
     private ConceptosXmlEntity idConcepto;
+    
+    @ManyToOne
+    @JoinColumn(name = "idComprobanteXml")
+    private ComprobanteXmlEntity idComprobante;
 }

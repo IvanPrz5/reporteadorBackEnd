@@ -31,7 +31,6 @@ public class CadenaOriginalController {
             File cfdi = new File(xmlPath);
             StreamSource sourceXml = new StreamSource(cfdi);
 
-
             TransformerFactory tFactory = TransformerFactory.newInstance();
             Transformer transformer = tFactory.newTransformer(sourceXsl);
             StringWriter out = new StringWriter();

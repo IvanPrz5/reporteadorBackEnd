@@ -1,7 +1,15 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -14,11 +22,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.example.reporteadorBackEnd.Controller.CadenaOriginal.CadenaOriginalController;
+import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
+import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.TrasladoOrRetencionXmlEntity;
 import com.example.reporteadorBackEnd.Repository.Xml.TrasladoOrRetencionRepository;
 import com.example.reporteadorBackEnd.Service.Xml.ConceptosService;
 import com.example.reporteadorBackEnd.Service.Xml.TrasladoOrRetencionService;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,
@@ -31,42 +46,29 @@ public class TrasladoOrRetencionController {
     TrasladoOrRetencionRepository trasladoRepository;
 
     @Autowired
-    TrasladoOrRetencionService trasladoService;
+    TrasladoOrRetencionService trasladoOrRetencionService;
 
     @Autowired
     ConceptosService conceptosService;
 
-    private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi4.xml";
-    private final String xmlSalida = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdi46.xml";
+    private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdiAux.xml";
+    private final String xmlSellado = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
 
     @GetMapping("/getAll/{status}")
     public List<TrasladoOrRetencionXmlEntity> allByStatus(@PathVariable("status") Boolean status, Sort sort) {
-        return (List<TrasladoOrRetencionXmlEntity>) trasladoService.getAllByStatus(status, sort);
+        return (List<TrasladoOrRetencionXmlEntity>) trasladoOrRetencionService.getAllByStatus(status, sort);
     }
 
     @PostMapping("/agregar")
     public ResponseEntity<TrasladoOrRetencionXmlEntity> createRegistro(@Valid @RequestBody TrasladoOrRetencionXmlEntity concepto) {
-        return trasladoService.createRegistro(concepto);
+        return trasladoOrRetencionService.createRegistro(concepto);
     }
 
-    @GetMapping("/groupBy")
-    public List<String> byTasaCuota(){
-        // trasladoService.sumaImporteTraslado();
-        return (List<String>) trasladoService.sumaAndgroupByTasaCuota();
-    }
-
-    // @GetMapping("/prueba")
-    /* public List<Object> suma(){
-        return (List<Object>) trasladoService.sumaImporteTraslado();
-    } */
-
-
-    /* @Transactional
+    @Transactional
     @GetMapping("/byIdComprobante/{id}")
     public List<TrasladoOrRetencionXmlEntity> formarXml(@PathVariable("id") Long id) {
-        List<ConceptosXmlEntity> conceptosXmlId = conceptosService.getByIdComprobante(id);
-        // List<TrasladoOrRetencionXmlEntity> nan = trasladoService.getByIdConcepto(id);
 
+        List<TrasladoOrRetencionXmlEntity> trasladoOrRetencionId = trasladoOrRetencionService.getByIdComprobanteXml(id);
         try {
             String nameSpace = "http://www.sat.gob.mx/cfd/4";
             String prefijo = "cfdi:";
@@ -82,8 +84,8 @@ public class TrasladoOrRetencionController {
             comprobante.setAttribute("xsi:schemaLocation",
                     "http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd");
 
-            ConceptosXmlEntity conceptosXmlEntity = conceptosXmlId.get(0);
-            ComprobanteXmlEntity comprobanteXmlEntity = conceptosXmlEntity.getIdComprobante();
+            TrasladoOrRetencionXmlEntity trasladoOrRetencionXmlEntity = trasladoOrRetencionId.get(0);
+            ComprobanteXmlEntity comprobanteXmlEntity = trasladoOrRetencionXmlEntity.getIdComprobante();
 
             comprobante.setAttribute("Version", comprobanteXmlEntity.getVersion());
             comprobante.setAttribute("Fecha", comprobanteXmlEntity.getFecha().toString());
@@ -120,8 +122,12 @@ public class TrasladoOrRetencionController {
             Element conceptos = document.createElement(prefijo + "Conceptos");
             comprobante.appendChild(conceptos);
 
-            for(int i=0; i<conceptosXmlId.size(); i++){
-                ConceptosXmlEntity conceptosXml = conceptosXmlId.get(i);
+            for(int i=0; i<trasladoOrRetencionId.size(); i++){
+                TrasladoOrRetencionXmlEntity trasladoOrRetencionConceptos = trasladoOrRetencionId.get(i);
+                ConceptosXmlEntity conceptosXml = trasladoOrRetencionConceptos.getIdConcepto();
+
+                System.out.println(conceptosXml);
+
                 Element concepto = document.createElement(prefijo + "Concepto");
                 conceptos.appendChild(concepto);
 
@@ -141,12 +147,7 @@ public class TrasladoOrRetencionController {
                 Element traslado = document.createElement(prefijo + "Traslado");
                 traslados.appendChild(traslado);
 
-                List<TrasladoOrRetencionXmlEntity> trasladosId = trasladoService.getByIdConcepto(Long.valueOf(i));
-                TrasladoOrRetencionXmlEntity trasladoXmlEntity = trasladosId.get(i);
-
-                System.out.println(trasladoXmlEntity.getImporte());
-                // TrasladoOrRetencionXmlEntity trasladoXmlEntity = trasladosId.get(i);
-                // System.out.println(trasladoXmlEntity.getImporte());
+                TrasladoOrRetencionXmlEntity trasladoXmlEntity = trasladoOrRetencionId.get(i);
 
                 traslado.setAttribute("Base", trasladoXmlEntity.getBase().toString());
                 traslado.setAttribute("Impuesto", trasladoXmlEntity.getIdImpuesto().getId());
@@ -155,15 +156,63 @@ public class TrasladoOrRetencionController {
                 traslado.setAttribute("Importe", trasladoXmlEntity.getImporte().toString());
             }
 
+            String tipoComprobante = comprobanteXmlEntity.getIdTipoComprobante().getId().toString();
+
+            if (tipoComprobante != "T" || tipoComprobante != "P") {
+                Element nodoImpuestos = document.createElement(prefijo + "Impuestos");
+                comprobante.appendChild(nodoImpuestos);
+
+                String impuestosTrasladado = trasladoOrRetencionService.sumaImporteTraslado(id).get(0);                
+                String impuestosRetenidos = trasladoOrRetencionService.sumaImporteRetenidos(id).get(0);
+                
+                if(impuestosTrasladado != null){
+                    nodoImpuestos.setAttribute("TotalImpuestosTrasladados", impuestosTrasladado);
+                }
+
+                if(impuestosRetenidos != null){
+                    nodoImpuestos.setAttribute("TotalImpuestosRetenidos", impuestosRetenidos);
+                }
+
+                List<String> array = trasladoOrRetencionService.sumaAndgroupByTasaCuota(id);
+                List<String> array2 = trasladoOrRetencionService.innerJoinTasaCuotaId(id);
+
+                Element trasladosNodoImpuestos = document.createElement(prefijo + "Traslados");
+                nodoImpuestos.appendChild(trasladosNodoImpuestos);
+
+                for(int i=0; i<array.size(); i++){
+                    String result [] = array.get(i).split(",");
+                    Element trasladoChild = document.createElement(prefijo + "Traslado");
+                    trasladosNodoImpuestos.appendChild(trasladoChild);
+                    if(result[i] == "Excento"){
+                        
+                    }
+                    trasladoChild.setAttribute("Impuesto", result[1]);
+                    trasladoChild.setAttribute("TipoFactor", result[2]);
+                    trasladoChild.setAttribute("TasaOCuota", array2.get(i));
+                    trasladoChild.setAttribute("Base", result[5]);
+                    trasladoChild.setAttribute("Importe", result[6]);
+                }
+            }
+
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(new File(xmlSalida));
+            StreamResult result = new StreamResult(new File(xmlPath));
             transformer.transform(source, result);
 
-            return null;
+            this.getXml();
+
+            return trasladoOrRetencionId;
         } catch (Exception e) {
             return null;
         }
-    } */
+    }
+
+    public String getXml() {
+        CadenaOriginalController cadenaOriginalController = new CadenaOriginalController();
+        cadenaOriginalController.sellarXml("12345678a", xmlPath, xmlSellado);
+        return null;
+    }
 }
+
+// https://www.postman.com/red-shadow-569412/workspace/sw-api/request/17529056-39ec10c5-3899-41a5-92c2-2b491a025f91
