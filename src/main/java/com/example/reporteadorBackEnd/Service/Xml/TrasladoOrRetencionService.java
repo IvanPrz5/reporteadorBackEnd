@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
-import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.TrasladoOrRetencionXmlEntity;
 import com.example.reporteadorBackEnd.Repository.Xml.ComprobanteRepository;
 import com.example.reporteadorBackEnd.Repository.Xml.ConceptosRepository;

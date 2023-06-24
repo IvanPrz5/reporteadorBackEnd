@@ -24,8 +24,8 @@ public interface TrasladoOrRetencionRepository extends JpaRepository<TrasladoOrR
     @Query(value = "SELECT SUM(t.importe) FROM traslado_or_retencion_xml AS t WHERE t.id_comprobante_xml = ?1 AND t.status = true AND t.is_retencion = true", nativeQuery = true)
     List<String> sumaImporteRetenidos(Long id);
 
-    @Query(value = "SELECT t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor, t.is_traslado, t.is_retencion, t.base, SUM(t.importe), COUNT(*) FROM traslado_or_retencion_xml AS t" 
-    + " WHERE t.id_comprobante_xml = ?1 AND t.status = true GROUP BY t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor, t.is_traslado, t.is_retencion, t.base ORDER BY t.id_impuesto", nativeQuery = true)
+    @Query(value = "SELECT t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor, t.is_traslado, t.is_retencion, SUM(t.importe), SUM(t.base), COUNT(*) FROM traslado_or_retencion_xml AS t" 
+    + " WHERE t.id_comprobante_xml = ?1 AND t.status = true GROUP BY t.id_tasa_cuota, t.id_impuesto, t.id_tipo_factor, t.is_traslado, t.is_retencion ORDER BY t.id_impuesto", nativeQuery = true)
     List<String> sumaAndgroupByTasaCuota(Long id);
 
     @Query(value="SELECT tc.valor_maximo FROM tasa_cuota tc INNER JOIN traslado_or_retencion_xml tl ON tc.id = tl.id_tasa_cuota WHERE tl.id_comprobante_xml = ?1 AND tl.status = true"

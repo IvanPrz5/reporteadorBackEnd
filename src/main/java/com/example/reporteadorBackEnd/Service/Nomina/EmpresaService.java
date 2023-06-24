@@ -82,12 +82,16 @@ public class EmpresaService {
                 X509Certificate certificado = (X509Certificate)cf.generateCertificate(is);
                 byte[] byteArray= certificado.getSerialNumber().toByteArray(); //obtengo no. de serie
                 String NoCertificado = new String(byteArray);
-                // System.out.println("No. Certificado:     " + NoCertificado);
+                
+                System.out.println(path + "*********");
+                
 
                 EmpresasEntity empresasData = empresasEntity.get();
                 empresasData.setCerB64(cerBase64);
                 empresasData.setNumCertificado(NoCertificado);
                 empresaRepository.save(empresasData);
+
+                // Files.delete(path);
                 return "Ok";
             } catch (Exception e) {
                 e.printStackTrace();

@@ -32,6 +32,8 @@ public class EmpresasEntity {
     @Column(columnDefinition = "TEXT", length = 3000)
     private String cerB64;
     @Column(columnDefinition = "TEXT", length = 3000)
+    private String routeCerB64;
+    @Column(columnDefinition = "TEXT", length = 3000)
     private String keyB64;
     @Column
     private String numCertificado;
