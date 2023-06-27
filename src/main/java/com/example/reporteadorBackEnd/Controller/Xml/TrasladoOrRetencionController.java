@@ -1,8 +1,13 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -10,10 +15,19 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,9 +48,22 @@ import com.example.reporteadorBackEnd.Entity.Xml.TrasladoOrRetencionXmlEntity;
 import com.example.reporteadorBackEnd.Repository.Xml.TrasladoOrRetencionRepository;
 import com.example.reporteadorBackEnd.Service.Xml.ConceptosService;
 import com.example.reporteadorBackEnd.Service.Xml.TrasladoOrRetencionService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,
         RequestMethod.PUT, })
@@ -255,7 +282,7 @@ public class TrasladoOrRetencionController {
     } */
 
     @GetMapping("/leerXml")
-    public String primeraPartePdf(){
+    public ResponseEntity<Resource> primeraPartePdf(){
         String route = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
         try {
             File file = new File(route);
@@ -265,25 +292,62 @@ public class TrasladoOrRetencionController {
 
             document.getDocumentElement().normalize();
             // System.out.println(document.getDocumentElement().getNodeName());
-            NodeList nodeList = document.getElementsByTagName("cfdi:Emisor");
-            Node node = nodeList.item(0);
-            Element element = (Element) node;
-            ArrayList<String> emisorArray = new ArrayList<String>();
-            emisorArray.add(element.getAttribute("Rfc"));
-            emisorArray.add(element.getAttribute("Nombre"));
-            NodeList nodeReceptor = document.getElementsByTagName("cfdi:Receptor");
-            Node node2 = nodeReceptor.item(0);
-            Element element2 = (Element) node2;
-            emisorArray.add(element2.getAttribute("Rfc"));
-            emisorArray.add(element2.getAttribute("Nombre"));
-            emisorArray.add(element.getAttribute("UsoCFDI"));
-            System.out.println(emisorArray);
+        
+            File fileJasper = ResourceUtils.getFile("C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/Blank_A4_1.jasper");
+            JasperReport jasper = (JasperReport) JRLoader.loadObject(fileJasper);
+
             
-            return null;
-        } catch (Exception e) {
+            NodeList listComprobante = document.getElementsByTagName("cfdi:Comprobante");
+            Node nodeComprobante = listComprobante.item(0);
+            Element atribsComprobante = (Element) nodeComprobante;    
+            ArrayList<String> lista = new ArrayList<String>();
+            lista.add(atribsComprobante.getAttribute("NoCertificado"));
+            /* for(int i=0; i<listConcepto.getLength(); i++){
+                Node nodeConcepto = listConcepto.item(i);
+                Element atribsConcepto = (Element) nodeConcepto;
+                lista.add(atribsConcepto.getAttribute("ClaveProdServ"));
+                // parametros.put("claveProdServ", atribsConcepto.getAttribute("ClaveProdServ"));
+                // System.out.println(atribsConcepto.getAttribute("ClaveProdServ"));
+            } */
+            String json = "{ \"rfcEmisor\": \"654654654654\"}";
+            // System.out.println(lista);
+            Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+            String prettyJson = prettyGson.toJson(lista);
+            System.out.println(prettyJson);
+
+            JsonDataSource datasource = new JsonDataSource(new ByteArrayInputStream(prettyJson.getBytes()));
+            HashMap<String, Object> parametros = new HashMap<>();
+
+            // JsonDataSource dataSource = new JsonDataSource(lista);
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasper, parametros, datasource);
+            byte[] reporte = JasperExportManager.exportReportToPdf(jasperPrint);
+            String sdf = (new SimpleDateFormat("dd/MM/yyyy")).format(new Date());
+            StringBuilder stringBuilder = new StringBuilder().append("InvoicePDF:");
+            ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                .filename(stringBuilder.append("ARCHIVO")
+                    .append("generateDate:")
+                    .append(sdf)
+                    .append(".pdf")
+                    .toString())
+                .build();
+            
+            System.out.println("Hola3");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(contentDisposition);
+            
+            return ResponseEntity.ok().contentLength((long) reporte.length)
+                .contentType(MediaType.APPLICATION_PDF)
+                .headers(headers).body(new ByteArrayResource(reporte));
+        
+            } catch (Exception e) {
             return null;
         }
     }
+    
+}
+
 
     /* @GetMapping("/timbrarXml")
     public String timbrarXml() {
@@ -336,7 +400,77 @@ fileItem.getOutputStream();
             return e.toString();
         }
     }
-} */
-}
+} 
+
+
+            /* NodeList nodeConcepto = document.getElementsByTagName("cfdi:Concepto");
+            Node node3 = nodeComprobante.item(0);
+            Element element3 = (Element) node3;
+            ArrayList<String> comprobanteArray = new ArrayList<String>();                
+            ArrayList<String> conceptoArray = new ArrayList<String>();
+            System.out.println(nodeConcepto.getLength());
+            for(int i=0; i<=nodeConcepto.getLength(); i++){
+                Node node4 = nodeConcepto.item(i);
+                Element element4 = (Element) node4;
+                // System.out.println(element4.getAttribute("ValorUnitario"));
+                conceptoArray.add(element4.getAttribute("Cantidad"));
+            } 
+
+            
+            NodeList nodeReceptor = document.getElementsByTagName("cfdi:Receptor");
+            Node node2 = nodeReceptor.item(0);
+            Element element2 = (Element) node2;
+            ArrayList<String> receptorArray = new ArrayList<String>();
+            receptorArray.add(element2.getAttribute("Rfc"));
+            receptorArray.add(element2.getAttribute("Nombre"));
+            receptorArray.add(element2.getAttribute("UsoCFDI"));
+
+            NodeList nodeComprobante = document.getElementsByTagName("cfdi:Comprobante");
+            Node node3 = nodeComprobante.item(0);
+            Element element3 = (Element) node3;
+            ArrayList<String> comprobanteArray = new ArrayList<String>();
+            comprobanteArray.add(element3.getAttribute("Fecha"));
+            comprobanteArray.add(element3.getAttribute("LugarExpedicion"));
+            comprobanteArray.add(element3.getAttribute("FormaPago"));
+            comprobanteArray.add(element3.getAttribute("MetodoPago"));
+            comprobanteArray.add(element3.getAttribute("SubTotal"));
+            // comprobanteArray.add(element3.getAttribute("Descuento"));
+            comprobanteArray.add(element3.getAttribute("Total"));
+
+
+
+
+
+            NodeList listEmisor = document.getElementsByTagName("cfdi:Emisor");
+            Node nodeEmisor = listEmisor.item(0);
+            Element atribsEmisor = (Element) nodeEmisor;
+            
+            parametros.put("rfcEmisor", atribsEmisor.getAttribute("Rfc"));
+            parametros.put("nombreEmisor", atribsEmisor.getAttribute("Nombre"));
+            parametros.put("Folio", "Modificar Folio");
+
+            NodeList listReceptor = document.getElementsByTagName("cfdi:Receptor");
+            Node nodeReceptor = listReceptor.item(0);
+            Element atribsReceptor = (Element) nodeReceptor;
+
+            parametros.put("rfcReceptor", atribsReceptor.getAttribute("Rfc"));
+            parametros.put("nombreReceptor", atribsReceptor.getAttribute("Nombre"));
+            parametros.put("usoCFDI", atribsReceptor.getAttribute("UsoCFDI"));
+            parametros.put("regimenFiscal", atribsReceptor.getAttribute("RegimenFiscalReceptor"));
+
+
+            NodeList listComprobante = document.getElementsByTagName("cfdi:Comprobante");
+            Node nodeComprobante = listComprobante.item(0);
+            Element atribsComprobante = (Element) nodeComprobante;
+
+            parametros.put("folioFiscal", "Hola");
+            parametros.put("numSerie", atribsComprobante.getAttribute("NoCertificado"));
+            parametros.put("serie", "Hola2");
+            parametros.put("codPostal", atribsComprobante.getAttribute("LugarExpedicion"));
+            parametros.put("tipoComprobante", atribsComprobante.getAttribute("TipoDeComprobante"));
+            String fecha = atribsComprobante.getAttribute("Fecha").replace("T", "  ");
+            parametros.put("fechaYhora", fecha);
+
+*/
 
 // https://www.postman.com/red-shadow-569412/workspace/sw-api/request/17529056-39ec10c5-3899-41a5-92c2-2b491a025f91
