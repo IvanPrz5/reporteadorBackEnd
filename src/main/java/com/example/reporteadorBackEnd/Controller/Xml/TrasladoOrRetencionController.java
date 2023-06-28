@@ -57,6 +57,7 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -284,6 +285,8 @@ public class TrasladoOrRetencionController {
     @GetMapping("/leerXml")
     public ResponseEntity<Resource> primeraPartePdf(){
         String route = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
+        String route2 = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/report.pdf";
+
         try {
             File file = new File(route);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -291,39 +294,67 @@ public class TrasladoOrRetencionController {
             Document document = db.parse(file);
 
             document.getDocumentElement().normalize();
-            // System.out.println(document.getDocumentElement().getNodeName());
         
-            File fileJasper = ResourceUtils.getFile("C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/Blank_A4_1.jasper");
+            Map<String, Object> parametros = new HashMap<>();
+            // String fileJasper = "C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/report_1.jrxml";
+            File fileJasper = ResourceUtils.getFile("C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/report_1_2_1.jasper");
             JasperReport jasper = (JasperReport) JRLoader.loadObject(fileJasper);
 
-            
             NodeList listComprobante = document.getElementsByTagName("cfdi:Comprobante");
             Node nodeComprobante = listComprobante.item(0);
-            Element atribsComprobante = (Element) nodeComprobante;    
-            ArrayList<String> lista = new ArrayList<String>();
-            lista.add(atribsComprobante.getAttribute("NoCertificado"));
-            /* for(int i=0; i<listConcepto.getLength(); i++){
+            Element atribsComprobante = (Element) nodeComprobante;
+
+            parametros.put("numSerie", atribsComprobante.getAttribute("NoCertificado"));
+            parametros.put("codPostal", atribsComprobante.getAttribute("LugarExpedicion"));
+            String fecha = atribsComprobante.getAttribute("Fecha").replace("T", "  ");
+            parametros.put("fechaYhora", fecha);
+            parametros.put("tipoComprobante", atribsComprobante.getAttribute("TipoDeComprobante"));
+
+            NodeList listEmisor = document.getElementsByTagName("cfdi:Emisor");
+            Node nodeEmisor = listEmisor.item(0);
+            Element atribsEmisor = (Element) nodeEmisor;
+            
+            parametros.put("rfcEmisor", atribsEmisor.getAttribute("Rfc"));
+            parametros.put("nombreEmisor", atribsEmisor.getAttribute("Nombre"));
+            parametros.put("regimenFiscal", atribsEmisor.getAttribute("RegimenFiscal"));
+
+            
+            NodeList listReceptor = document.getElementsByTagName("cfdi:Receptor");
+            Node nodeReceptor = listReceptor.item(0);
+            Element atribsReceptor = (Element) nodeReceptor;
+
+            parametros.put("rfcReceptor", atribsReceptor.getAttribute("Rfc"));
+            parametros.put("nombreReceptor", atribsReceptor.getAttribute("Nombre"));
+            parametros.put("usoCfdi", atribsReceptor.getAttribute("UsoCFDI"));
+
+            NodeList listConcepto = document.getElementsByTagName("cfdi:Concepto");
+            List<ConceptoAux> conceptoList = new ArrayList<>();
+            for(int i=0; i<listConcepto.getLength(); i++){
                 Node nodeConcepto = listConcepto.item(i);
                 Element atribsConcepto = (Element) nodeConcepto;
-                lista.add(atribsConcepto.getAttribute("ClaveProdServ"));
-                // parametros.put("claveProdServ", atribsConcepto.getAttribute("ClaveProdServ"));
-                // System.out.println(atribsConcepto.getAttribute("ClaveProdServ"));
-            } */
-            String json = "{ \"rfcEmisor\": \"654654654654\"}";
-            // System.out.println(lista);
-            Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
-            String prettyJson = prettyGson.toJson(lista);
-            System.out.println(prettyJson);
 
-            JsonDataSource datasource = new JsonDataSource(new ByteArrayInputStream(prettyJson.getBytes()));
-            HashMap<String, Object> parametros = new HashMap<>();
+                /* onceptoAux conceptoAux = new ConceptoAux(
+                    atribsConcepto.getAttribute("ClaveProdServ"), 
+                    atribsConcepto.getAttribute("Cantidad"),
+                    atribsConcepto.getAttribute("ClaveUnidad"),
+                    atribsConcepto.getAttribute("Unidad"),
+                    atribsConcepto.getAttribute("ValorUnitario"),
+                    atribsConcepto.getAttribute("Importe"),
+                    atribsConcepto.getAttribute("Descripcion")
+                    );
+                conceptoList.add(conceptoAux); */
+            }
+            System.out.println(conceptoList);
+            JRBeanCollectionDataSource conceptosDataSource = new JRBeanCollectionDataSource(conceptoList);
+            parametros.put("conceptosData", conceptosDataSource);
 
-            // JsonDataSource dataSource = new JsonDataSource(lista);
-
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasper, parametros, datasource);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasper, parametros, new JREmptyDataSource());
+            JasperExportManager.exportReportToPdfFile(jasperPrint, route2);
+            
             byte[] reporte = JasperExportManager.exportReportToPdf(jasperPrint);
             String sdf = (new SimpleDateFormat("dd/MM/yyyy")).format(new Date());
             StringBuilder stringBuilder = new StringBuilder().append("InvoicePDF:");
+            
             ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
                 .filename(stringBuilder.append("ARCHIVO")
                     .append("generateDate:")
@@ -331,16 +362,14 @@ public class TrasladoOrRetencionController {
                     .append(".pdf")
                     .toString())
                 .build();
-            
-            System.out.println("Hola3");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentDisposition(contentDisposition);
-            
+            System.out.println("Hola");
             return ResponseEntity.ok().contentLength((long) reporte.length)
                 .contentType(MediaType.APPLICATION_PDF)
                 .headers(headers).body(new ByteArrayResource(reporte));
-        
+            
             } catch (Exception e) {
             return null;
         }

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="611fbb0f-0dd6-41c9-a3eb-6459b92b594c">
+	<subDataset name="conceptosData" uuid="e2512efc-a3e4-41a5-ba31-a24cf1087ee5">
+		<queryString>
+			<![CDATA[]]>
+		</queryString>
+		<field name="claveProdServ" class="java.lang.String"/>
+		<field name="valorUnitario" class="java.lang.String"/>
+		<field name="importe" class="java.lang.String"/>
+		<field name="cantidad" class="java.lang.String"/>
+		<field name="claveUnidad" class="java.lang.String"/>
+		<field name="unidad" class="java.lang.String"/>
+		<field name="descripcion" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="rfcEmisor" class="java.lang.String"/>
+	<parameter name="nombreEmisor" class="java.lang.String"/>
+	<parameter name="rfcReceptor" class="java.lang.String"/>
+	<parameter name="conceptosData" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="usoCfdi" class="java.lang.String"/>
+	<parameter name="nombreReceptor" class="java.lang.String"/>
+	<parameter name="numSerie" class="java.lang.String"/>
+	<parameter name="fechaYhora" class="java.lang.String"/>
+	<parameter name="codPostal" class="java.lang.String"/>
+	<parameter name="tipoComprobante" class="java.lang.String"/>
+	<parameter name="regimenFiscal" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="144" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="20" width="52" height="12" uuid="7cd27f61-a14b-4b70-9dd4-a5df0e14bc4b"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RFC Emisor:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="35" width="80" height="12" uuid="8f2b84db-ffb4-40d1-92cb-9957f08f7ea6">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre Emisor:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="65" width="60" height="12" uuid="47d9b63c-4393-4776-bd54-8ac5e895de97">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RFC Receptor:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="50" width="52" height="12" uuid="9fed48a6-54b6-4d66-8fca-97d8ce562874">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Folio:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="110" y="20" width="160" height="12" uuid="32cf61da-b89c-4049-8777-2894062a5afc"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{rfcEmisor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="35" width="160" height="12" uuid="5b0730d8-3557-41c9-8d7a-6f6245738229">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nombreEmisor}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="80" width="80" height="12" uuid="91f6db8e-28e1-450e-8dab-e64d521f4296">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre Receptor:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="95" width="50" height="12" uuid="8480538c-94b0-4a75-a389-8246e4bf5bd6">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Uso CFDI:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="110" y="65" width="160" height="12" uuid="c98ae3fa-6750-4ac6-88ad-3e6817110e5a">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{rfcReceptor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="80" width="160" height="12" uuid="debef08c-f3a8-441f-95a4-a31b5aa36d88">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nombreReceptor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="95" width="160" height="12" uuid="eb617b64-659c-41bf-8f84-b4459f41fab5">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{usoCfdi}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="290" y="20" width="60" height="12" uuid="d54eba1f-0026-4301-a82d-e88ad588fa4d"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Folio Fiscal:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="35" width="100" height="12" uuid="c60f6b75-5922-447c-9cc7-4de8ed3a85af">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. de serie del CSD:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="65" width="120" height="22" uuid="529d9122-c89f-4ec2-96e4-43adeb6d9f81">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código postal, fecha y hora de emisión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="50" width="30" height="12" uuid="b403ce86-67e8-489b-95ab-6c22463e90f1">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Serie:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="90" width="110" height="12" uuid="f4d0df29-b93a-4a67-837c-df7e2ad8326e">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Efecto de comprobante:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="105" width="70" height="12" uuid="7f9a6efd-6231-4625-9852-2897aca377f0">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Régimen Fiscal:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="430" y="105" width="114" height="13" uuid="69f8ec20-4c65-4add-9ae7-00b3844ec5d0">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{regimenFiscal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="90" width="90" height="16" uuid="1f34b4cf-9e2d-4515-961f-fd8c93441acc">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tipoComprobante}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="65" width="115" height="25" uuid="c8b4a3f8-16c8-46d8-8e07-ef78a198ce46">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{codPostal} + $P{fechaYhora}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="35" width="114" height="12" uuid="a88b4c5b-9f47-46c9-93d9-d45043c80ab5">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{numSerie}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="130" width="100" height="14" uuid="f93fe13a-9a2c-4465-8a78-f1b4589d8c32"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Conceptos:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="72">
+			<rectangle>
+				<reportElement x="0" y="17" width="549" height="38" uuid="caa7b41d-c85a-4e3b-8842-e6cf28aea380"/>
+			</rectangle>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="60" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
