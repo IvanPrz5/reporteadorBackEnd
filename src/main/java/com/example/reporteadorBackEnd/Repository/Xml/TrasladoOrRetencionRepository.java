@@ -31,4 +31,13 @@ public interface TrasladoOrRetencionRepository extends JpaRepository<TrasladoOrR
     @Query(value="SELECT tc.valor_maximo FROM tasa_cuota tc INNER JOIN traslado_or_retencion_xml tl ON tc.id = tl.id_tasa_cuota WHERE tl.id_comprobante_xml = ?1 AND tl.status = true"
     + " GROUP BY tc.valor_maximo ORDER BY tc.valor_maximo DESC", nativeQuery = true)
     List<String> innerJoinTasaCuotaId(Long id);
+
+    @Query(value="SELECT descripcion FROM moneda WHERE id = ?1", nativeQuery = true)
+    List<String> getDescripcionFromMoneda(String id);
+
+    @Query(value="SELECT descripcion FROM forma_pago WHERE id = ?1", nativeQuery = true)
+    List<String> getDescripcionFromFormaPago(String id);
+
+    @Query(value="SELECT descripcion FROM metodo_pago WHERE id = ?1", nativeQuery = true)
+    List<String> getDescripcionFromMetodoPago(String id);
 }

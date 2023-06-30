@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface ClientesRepository extends JpaRepository<ClientesEntity, Long> {
     List<ClientesEntity> findByStatus(Boolean status, Sort sort);
+    
 }

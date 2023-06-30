@@ -27,11 +27,12 @@
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
+	<field name="cantidad" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="144" splitType="Stretch">
+		<band height="155" splitType="Stretch">
 			<staticText>
 				<reportElement x="20" y="20" width="52" height="12" uuid="7cd27f61-a14b-4b70-9dd4-a5df0e14bc4b"/>
 				<textElement>
@@ -226,17 +227,125 @@
 		</band>
 	</title>
 	<columnHeader>
-		<band height="72">
+		<band height="18">
 			<rectangle>
-				<reportElement x="0" y="17" width="549" height="38" uuid="caa7b41d-c85a-4e3b-8842-e6cf28aea380"/>
+				<reportElement mode="Opaque" x="70" y="0" width="50" height="18" backcolor="#89B0CC" uuid="86c42431-4777-41ad-8069-08f191e891a7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="172" y="0" width="203" height="18" backcolor="#89B0CC" uuid="21763fad-d428-4531-8df4-9917409d8616">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="375" y="0" width="60" height="18" backcolor="#89B0CC" uuid="e4a3006d-6083-40a5-9b0c-74c171dd99a3">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="375" y="0" width="60" height="18" uuid="d1289b44-a507-4864-98f7-ba36f72ab264"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Valor unitario]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Opaque" x="435" y="0" width="60" height="18" backcolor="#89B0CC" uuid="a8090b60-83c8-4211-aa20-b6a5928631ea">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="70" height="18" backcolor="#89B0CC" uuid="9b6697a1-b050-408d-a500-59b8f715ad5f"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="70" height="18" uuid="6638f4d1-89ea-4edf-ae83-228652d43bb4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[No. Identificación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="0" width="50" height="18" uuid="6993681e-ca73-4c2d-a4f5-820aabaaddc9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Opaque" x="120" y="0" width="52" height="18" backcolor="#89B0CC" uuid="6b52af62-4129-4184-9689-e72716606c79">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="120" y="0" width="52" height="18" uuid="28fcf0ae-017a-4152-a143-15f34e204e16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Unidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="0" width="202" height="18" uuid="b102a528-2ec6-4588-8613-c125128ddaf4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Opaque" x="495" y="0" width="60" height="18" backcolor="#89B0CC" uuid="2bbeb214-99bb-4875-8445-9fe38e151bab">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="435" y="0" width="60" height="18" uuid="fdd4ce47-d7a3-4330-9b28-24501a426b9a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Descuento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="495" y="0" width="60" height="18" uuid="4157c983-9a23-4c24-93a2-6551e087cfe3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Importe]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="0" width="100" height="18" uuid="75b6b8b9-7a71-4e56-88e3-1e6a84a72bf5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="41aaae5b-fad0-488b-baee-965eb7362a49"/>
+				</reportElement>
+				<text><![CDATA[cantidad]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="60" splitType="Stretch"/>
+		<band height="12" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<rectangle>
+				<reportElement x="70" y="0" width="50" height="12" uuid="56c5b0ac-83eb-4e0c-90e2-e4510dc88691">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<textField>
+				<reportElement x="70" y="0" width="50" height="12" uuid="9e8a7adf-82b6-4af4-8165-3429cb8185aa">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="41aaae5b-fad0-488b-baee-965eb7362a49"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="0" y="0" width="70" height="12" uuid="5d8739a4-2a94-446a-acaa-09d08dd116a6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+		</band>
 	</detail>
 	<columnFooter>
-		<band height="45" splitType="Stretch"/>
+		<band height="40" splitType="Stretch"/>
 	</columnFooter>
 	<pageFooter>
 		<band height="54" splitType="Stretch"/>

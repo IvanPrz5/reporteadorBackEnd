@@ -90,6 +90,33 @@ public class TrasladoOrRetencionService {
         }
     }
 
+    public List<String> getDescripcionFromMoneda(String id){
+        try {
+            List<String> traslado = trasladoOrRetencionRepository.getDescripcionFromMoneda(id);
+            return traslado;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public List<String> getDescripcionFromFormaPago(String id){
+        try {
+            List<String> traslado = trasladoOrRetencionRepository.getDescripcionFromFormaPago(id);
+            return traslado;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public List<String> getDescripcionFromMetodoPago(String id){
+        try {
+            List<String> traslado = trasladoOrRetencionRepository.getDescripcionFromMetodoPago(id);
+            return traslado;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /* public List<TrasladoOrRetencionXmlEntity> getByIdConcepto(Long id){
         Optional<ConceptosXmlEntity> conceptosXmlEntity = conceptosRepository.findById(id);
         ConceptosXmlEntity conceptosId = conceptosXmlEntity.get();

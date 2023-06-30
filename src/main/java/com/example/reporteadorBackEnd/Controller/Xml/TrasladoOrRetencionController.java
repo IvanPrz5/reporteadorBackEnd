@@ -1,6 +1,5 @@
 package com.example.reporteadorBackEnd.Controller.Xml;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,17 +7,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ByteArrayResource;
@@ -45,25 +39,17 @@ import com.example.reporteadorBackEnd.Controller.CadenaOriginal.CadenaOriginalCo
 import com.example.reporteadorBackEnd.Entity.Xml.ComprobanteXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.ConceptosXmlEntity;
 import com.example.reporteadorBackEnd.Entity.Xml.TrasladoOrRetencionXmlEntity;
+import com.example.reporteadorBackEnd.Repository.CFDI.MonedaRepository;
 import com.example.reporteadorBackEnd.Repository.Xml.TrasladoOrRetencionRepository;
 import com.example.reporteadorBackEnd.Service.Xml.ConceptosService;
 import com.example.reporteadorBackEnd.Service.Xml.TrasladoOrRetencionService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import net.sf.jasperreports.engine.JREmptyDataSource;
-import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,
@@ -80,6 +66,9 @@ public class TrasladoOrRetencionController {
 
     @Autowired
     ConceptosService conceptosService;
+
+    @Autowired
+    MonedaRepository repo;
 
     private final String xmlPath = "C:/Users/Propietario/Desktop/reporteadorBackEnd/cfdiAux.xml";
     private final String xmlSellado = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
@@ -147,7 +136,6 @@ public class TrasladoOrRetencionController {
                     comprobanteXmlEntity.getIdCliente().getIdCodigoPostal().getId());
             receptor.setAttribute("RegimenFiscalReceptor",
                     comprobanteXmlEntity.getIdCliente().getIdRegimenFiscal().getId());
-            receptor.setAttribute("UsoCFDI", comprobanteXmlEntity.getIdCliente().getIdUsoCfdi().getId());
 
             Element conceptos = document.createElement(prefijo + "Conceptos");
             comprobante.appendChild(conceptos);
@@ -209,10 +197,6 @@ public class TrasladoOrRetencionController {
                 Element trasladosNodoImpuestos = document.createElement(prefijo + "Traslados");
                 nodoImpuestos.appendChild(trasladosNodoImpuestos);
 
-                System.out.println(array);
-                System.out.println(array2);
-
-
                 for(int i=0; i<array.size(); i++){
                     String result [] = array.get(i).split(",");
                     Element trasladoChild = document.createElement(prefijo + "Traslado");
@@ -251,37 +235,6 @@ public class TrasladoOrRetencionController {
         return null;
     }
 
-    /* @GetMapping("/leerXml")
-    public String lerrXml(){
-        String route = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
-        try {
-            File file = new File(route);
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document document = db.parse(file);
-
-            document.getDocumentElement().normalize();
-            System.out.println(document.getDocumentElement().getNodeName());
-            NodeList nodeList = document.getElementsByTagName("cfdi:Comprobante");
-            System.out.println(nodeList);
-            Node node = nodeList.item(0);
-            System.out.println(node.getNodeName());
-            Element element = (Element) node;
-            System.out.println(element.getAttribute("Version"));
-            
-            for(int i=0; i<nodeList.getLength(); i++){
-                Node node = nodeList.item(i);
-                System.out.println(node.getNodeName());
-                Element element = (Element) node;
-                element.getAttribute(i);
-            }
-            
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
-    } */
-
     @GetMapping("/leerXml")
     public ResponseEntity<Resource> primeraPartePdf(){
         String route = "C:/Users/Propietario/Desktop/reporteadorBackEnd/xml/cfdiSellado.xml";
@@ -297,7 +250,7 @@ public class TrasladoOrRetencionController {
         
             Map<String, Object> parametros = new HashMap<>();
             // String fileJasper = "C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/report_1.jrxml";
-            File fileJasper = ResourceUtils.getFile("C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/report_1_2_1.jasper");
+            File fileJasper = ResourceUtils.getFile("C:/Users/Propietario/Desktop/reporteadorBackEnd/resources/Jasper/report_1.jasper");
             JasperReport jasper = (JasperReport) JRLoader.loadObject(fileJasper);
 
             NodeList listComprobante = document.getElementsByTagName("cfdi:Comprobante");
@@ -309,6 +262,13 @@ public class TrasladoOrRetencionController {
             String fecha = atribsComprobante.getAttribute("Fecha").replace("T", "  ");
             parametros.put("fechaYhora", fecha);
             parametros.put("tipoComprobante", atribsComprobante.getAttribute("TipoDeComprobante"));
+            List<String> moneda = trasladoOrRetencionService.getDescripcionFromMoneda(atribsComprobante.getAttribute("Moneda"));
+            parametros.put("moneda", moneda.get(0));
+            List<String> formaPago = trasladoOrRetencionService.getDescripcionFromFormaPago(atribsComprobante.getAttribute("FormaPago"));
+            parametros.put("formaPago", formaPago.get(0));
+            List<String> metodoPago = trasladoOrRetencionService.getDescripcionFromMetodoPago(atribsComprobante.getAttribute("MetodoPago"));
+            parametros.put("metodoPago", metodoPago.get(0));
+            parametros.put("numCertificado", atribsComprobante.getAttribute("NoCertificado"));
 
             NodeList listEmisor = document.getElementsByTagName("cfdi:Emisor");
             Node nodeEmisor = listEmisor.item(0);
@@ -318,7 +278,6 @@ public class TrasladoOrRetencionController {
             parametros.put("nombreEmisor", atribsEmisor.getAttribute("Nombre"));
             parametros.put("regimenFiscal", atribsEmisor.getAttribute("RegimenFiscal"));
 
-            
             NodeList listReceptor = document.getElementsByTagName("cfdi:Receptor");
             Node nodeReceptor = listReceptor.item(0);
             Element atribsReceptor = (Element) nodeReceptor;
@@ -333,7 +292,7 @@ public class TrasladoOrRetencionController {
                 Node nodeConcepto = listConcepto.item(i);
                 Element atribsConcepto = (Element) nodeConcepto;
 
-                /* onceptoAux conceptoAux = new ConceptoAux(
+                ConceptoAux conceptoAux = new ConceptoAux(
                     atribsConcepto.getAttribute("ClaveProdServ"), 
                     atribsConcepto.getAttribute("Cantidad"),
                     atribsConcepto.getAttribute("ClaveUnidad"),
@@ -342,13 +301,16 @@ public class TrasladoOrRetencionController {
                     atribsConcepto.getAttribute("Importe"),
                     atribsConcepto.getAttribute("Descripcion")
                     );
-                conceptoList.add(conceptoAux); */
+                conceptoList.add(conceptoAux);
             }
+
+            parametros.put("cadenaOriginal", this.getXml().toString());
+
             System.out.println(conceptoList);
             JRBeanCollectionDataSource conceptosDataSource = new JRBeanCollectionDataSource(conceptoList);
-            parametros.put("conceptosData", conceptosDataSource);
+            // parametros.put("conceptosData", conceptosDataSource);
 
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasper, parametros, new JREmptyDataSource());
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasper, parametros, conceptosDataSource);
             JasperExportManager.exportReportToPdfFile(jasperPrint, route2);
             
             byte[] reporte = JasperExportManager.exportReportToPdf(jasperPrint);
@@ -430,8 +392,6 @@ fileItem.getOutputStream();
         }
     }
 } 
-
-
             /* NodeList nodeConcepto = document.getElementsByTagName("cfdi:Concepto");
             Node node3 = nodeComprobante.item(0);
             Element element3 = (Element) node3;
@@ -465,10 +425,6 @@ fileItem.getOutputStream();
             comprobanteArray.add(element3.getAttribute("SubTotal"));
             // comprobanteArray.add(element3.getAttribute("Descuento"));
             comprobanteArray.add(element3.getAttribute("Total"));
-
-
-
-
 
             NodeList listEmisor = document.getElementsByTagName("cfdi:Emisor");
             Node nodeEmisor = listEmisor.item(0);
